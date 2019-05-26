@@ -3,6 +3,7 @@
 import socket
 import time
 import unicodedata
+import os
 
 try:
     import queue
@@ -20,12 +21,12 @@ from scrollphathd.fonts import font5x7
 
 #
 # TWITTER INIT
-# TODO: Move to environment vars
+#
 
-consumer_key = 'IvYMyt8c7Fsx4DqKElQNPxn8S'
-consumer_secret = 'IRNJWHb8zTsP2ReNgPQdYfBm4dxC1tT1TTPL3nIdmJDFrOzA6m'
-access_token = '368265694-Dg0wHLz5lktTzj3L6WmYfFJugKfKvjrM8WGZAfQe'
-access_token_secret = 'awFxoVkeX1ucM9I1l457w9TRI6stCQJiYMg2ZVSG9IxLK'
+consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+access_token = os.environ['TWITTER_ACCESS_TOKEN']
+access_token_secret = os.environ['TWITTER_ACCESS_SECRET']
 
 if consumer_key == '' or consumer_secret == '' or access_token == '' or access_token_secret == '':
     print("You need to configure your Twitter API keys! Edit this file for more information!")
