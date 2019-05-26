@@ -120,7 +120,7 @@ class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if not status.text.startswith('RT'):
             msg = status.text.upper().replace('#TUFFWED', '')
-            status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.screen_name.upper(), text=msg)
+            status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
 
             try:
                 status = unicodedata.normalize('NFKD', status).encode('ascii', 'ignore')
