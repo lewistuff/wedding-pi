@@ -18,6 +18,7 @@ except ImportError:
 
 import scrollphathd
 from scrollphathd.fonts import font5x7
+from subprocess import check_output
 
 #
 # TWITTER INIT
@@ -57,6 +58,7 @@ def on_boot():
         print("[INFO] Waiting for tweets with " + HASHTAG_TO_TRACK + "...")
         print("[INFO] " + time.strftime("%Y-%m-%d %H:%M"))
         print("[INFO] Hostname=" + runtime["host"])
+        print check_output(['iw', 'wlan0', 'link'])
 
         scrollphathd.clear()
         scrollphathd.show()
