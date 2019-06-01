@@ -23,10 +23,10 @@ from scrollphathd.fonts import font5x7
 # TWITTER INIT
 #
 
-consumer_key = os.environ['TWITTER_CONSUMER_KEY']
-consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
-access_token = os.environ['TWITTER_ACCESS_TOKEN']
-access_token_secret = os.environ['TWITTER_ACCESS_SECRET']
+consumer_key = os.getenv('TWITTER_CONSUMER_KEY')
+consumer_secret = os.getenv('TWITTER_CONSUMER_SECRET')
+access_token = os.getenv('TWITTER_ACCESS_TOKEN')
+access_token_secret = os.getenv('TWITTER_ACCESS_SECRET')
 
 if consumer_key == '' or consumer_secret == '' or access_token == '' or access_token_secret == '':
     print("You need to configure your Twitter API keys! Edit this file for more information!")
@@ -158,3 +158,4 @@ except KeyboardInterrupt:
     del myStream
     del incoming_q
     print("Exiting!")
+    exit()
