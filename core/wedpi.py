@@ -76,6 +76,11 @@ def reset():
     scrollphathd.show()
 
 
+def trim_hashtag(msg):
+    hashtag = HASHTAG_TO_TRACK.upper()
+    return msg.upper().replace(hashtag, '')
+
+
 #
 # MAIN
 # define main loop to fetch formatted tweet from queue
@@ -119,7 +124,7 @@ def mainloop():
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if not status.text.startswith('RT'):
-            msg = status.text.upper().replace('#TUFFWED', '')
+            msg = trim_hashtag(status.text)
             status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
 
             try:
