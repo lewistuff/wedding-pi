@@ -55,9 +55,9 @@ def on_boot():
     if runtime["is_first_run"] == 1:
         print("*** WEDPI ***")
         print("[INFO] We're online.")
-        print("[INFO] Waiting for tweets with " + HASHTAG_TO_TRACK + "...")
-        print("[INFO] " + time.strftime("%Y-%m-%d %H:%M"))
-        print("[INFO] Hostname=" + runtime["host"])
+        print(u"[INFO] {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
+        print(u"[INFO] Hostname={host}".format(host=runtime["host"]))
+        print(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK))
         print check_output(['iw', 'wlan0', 'link'])
 
         scrollphathd.clear()
@@ -82,11 +82,6 @@ def reset():
     """Clear the display"""
     scrollphathd.clear()
     scrollphathd.show()
-
-
-def trim_hashtag(msg):
-    hashtag = HASHTAG_TO_TRACK.upper()
-    return msg.upper().replace(hashtag, '')
 
 
 #
@@ -132,7 +127,7 @@ def mainloop():
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if not status.text.startswith('RT'):
-            msg = trim_hashtag(status.text)
+            msg = status.text.upper().replace(HASHTAG_TO_TRACK.upper(), '')
             status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
 
             try:
