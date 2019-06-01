@@ -52,6 +52,12 @@ runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 def on_boot():
     """Display the hostname on the first run to identify the rpi"""
     if runtime["is_first_run"] == 1:
+        print("*** WEDPI ***")
+        print("[INFO] We're online.")
+        print("[INFO] Waiting for tweets with " + HASHTAG_TO_TRACK + "...")
+        print("[INFO] " + time.strftime("%Y-%m-%d %H:%M"))
+        print("[INFO] Hostname=" + runtime["host"])
+
         scrollphathd.clear()
         scrollphathd.show()
 
@@ -115,7 +121,7 @@ def mainloop():
             incoming_q.task_done()
             incoming_q.put(status)
 
-            print("DEBUG: pending tweet queue size = " + str(incoming_q.qsize()))
+            print("[DEBUG] Pending tweet queue size = " + str(incoming_q.qsize()))
 
         except queue.Empty:
             time.sleep(1)
@@ -136,7 +142,7 @@ class MyStreamListener(tweepy.StreamListener):
             incoming_q.put(status)
 
     def on_error(self, status_code):
-        print("Error: {}".format(status_code))
+        print("[ERROR] {}".format(status_code))
         if status_code == 420:
             return False
 
