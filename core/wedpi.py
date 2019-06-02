@@ -37,10 +37,10 @@ if consumer_key == '' or consumer_secret == '' or access_token == '' or access_t
 # PARAMS
 #
 
-HASHTAG_TO_TRACK = '#tuffwed'
-DISPLAY_BRIGHTNESS = 0.2
-BOOT_SCROLL_DELAY_IN_SECS = 0.06
-TWEET_SCROLL_DELAY_IN_SECS = 0.02
+HASHTAG_TO_TRACK = os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed')
+DISPLAY_BRIGHTNESS = os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2)
+BOOT_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06)
+TWEET_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02)
 FONT = font5x7
 
 # make FIFO queue
@@ -54,8 +54,8 @@ def prepare_msg(text):
 # init params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
-incoming_q.put(prepare_msg("Saturday 8th June"))
-incoming_q.put(prepare_msg("Tweet us using #tuffwed"))
+incoming_q.put(prepare_msg("Saturday 8th June 2019"))
+incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
 
 
 def on_boot():
