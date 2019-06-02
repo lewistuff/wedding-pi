@@ -54,8 +54,8 @@ def prepare_msg(text):
 # init params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
-incoming_q.put("Saturday 8th June")
-incoming_q.put("Tweet us using #tuffwed")
+incoming_q.put(prepare_msg("Saturday 8th June"))
+incoming_q.put(prepare_msg("Tweet us using #tuffwed"))
 
 
 def on_boot():
