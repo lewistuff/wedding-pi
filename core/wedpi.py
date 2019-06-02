@@ -52,19 +52,22 @@ runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 
 def on_boot():
     """Display the hostname on the first run to identify the rpi"""
+    ssid = check_output(['iwgetid'])
+
     if runtime["is_first_run"] == 1:
         print("*** WEDPI ***")
-        print("[INFO] We're online.")
-        print(u"[INFO] {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
+        print(u"[INFO] We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
         print(u"[INFO] Hostname={host}".format(host=runtime["host"]))
-        print(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK))
-        print check_output(['iw', 'wlan0', 'link'])
+        print(u"[INFO] Network={essid}".format(essid=ssid))
+        print(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
+        print("*************")
 
         scrollphathd.clear()
         scrollphathd.show()
 
-        length = scrollphathd.write_string(u'  ::: WHOAMI? >>> {host} :::  '
+        length = scrollphathd.write_string(u'  ::: HOST >>> {host} :::  '
                                            .format(host=runtime["host"]), font=FONT, brightness=DISPLAY_BRIGHTNESS)
+        length += scrollphathd.write_string(u'  ::: WIFI >>> {ssid} :::  '.format(ssid=ssid))
         length -= scrollphathd.width
 
         # Now for the scrolling loop...
