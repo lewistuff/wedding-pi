@@ -159,8 +159,9 @@ try:
     mainloop()
 
 except KeyboardInterrupt:
-    myStream.disconnect()
+    print("Exiting!")
+
+finally:
     del myStream
     del incoming_q
-    print("Exiting!")
     exit()
