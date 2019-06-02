@@ -52,7 +52,7 @@ runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 
 def on_boot():
     """Display the hostname on the first run to identify the rpi"""
-    ssid = check_output(['iwgetid'])
+    ssid = check_output(['iwgetid']).split('ESSID:', 1)[1].strip()
 
     if runtime["is_first_run"] == 1:
         print("*** WEDPI ***")
