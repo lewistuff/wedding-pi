@@ -61,9 +61,9 @@ def prepare_msg(text):
 # init params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 logging.basicConfig(filename=WEDPI_LOG_FILE, level=LOG_LEVEL)
-incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
-incoming_q.put(prepare_msg("Saturday 8th June 2019"))
-incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
+# incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
+# incoming_q.put(prepare_msg("Saturday 8th June 2019"))
+# incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
 
 
 def on_boot():
