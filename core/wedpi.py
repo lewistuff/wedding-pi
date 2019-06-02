@@ -72,10 +72,10 @@ def on_boot():
 
     if runtime["is_first_run"] == 1:
         logging.debug("*** WEDPI ***")
-        logging.debug(u"[INFO] We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
-        logging.debug(u"[INFO] Hostname={host}".format(host=runtime["host"]))
-        logging.debug(u"[INFO] Network={essid}".format(essid=ssid))
-        logging.debug(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
+        logging.debug(u"| We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
+        logging.debug(u"| Hostname={host}".format(host=runtime["host"]))
+        logging.debug(u"| Network={essid}".format(essid=ssid))
+        logging.debug(u"| Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
         logging.debug("*************")
 
         scrollphathd.clear()
