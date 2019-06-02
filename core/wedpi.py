@@ -65,9 +65,8 @@ def on_boot():
         scrollphathd.clear()
         scrollphathd.show()
 
-        length = scrollphathd.write_string(u'  ::: HOST >>> {host} :::  '
-                                           .format(host=runtime["host"]), font=FONT, brightness=DISPLAY_BRIGHTNESS)
-        length += scrollphathd.write_string(u'  ::: WIFI >>> {ssid} :::  '.format(ssid=ssid))
+        length = scrollphathd.write_string(u'  ::: HOST >>> {host} :::  WIFI >>> {ssid} :::    '
+                                           .format(host=runtime["host"], ssid=ssid), font=FONT, brightness=DISPLAY_BRIGHTNESS)
         length -= scrollphathd.width
 
         # Now for the scrolling loop...
