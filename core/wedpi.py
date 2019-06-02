@@ -4,6 +4,7 @@ import socket
 import time
 import unicodedata
 import os
+import logging
 
 try:
     import queue
@@ -41,18 +42,25 @@ HASHTAG_TO_TRACK = os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed')
 DISPLAY_BRIGHTNESS = os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2)
 BOOT_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06)
 TWEET_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02)
+WEDPI_LOG_FILE = os.getenv('WEDPI_LOG_FILE', '/tmp/wedpi-app.log')
 FONT = font5x7
+LOG_LEVEL = logging.DEBUG
 
 # make FIFO queue
 incoming_q = queue.Queue()
 
 
 def prepare_msg(text):
-    return u'     {msg}     '.format(msg=text.upper())
+    status = u'     {msg}     '.format(msg=text.upper())
+    try:
+        return unicodedata.normalize('NFKD', status).encode('ascii', 'ignore')
+    except BaseException as e:
+        logging.exception(e)
 
 
 # init params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
+logging.basicConfig(filename=WEDPI_LOG_FILE, level=LOG_LEVEL)
 incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
 incoming_q.put(prepare_msg("Saturday 8th June 2019"))
 incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
@@ -63,12 +71,12 @@ def on_boot():
     ssid = check_output(['iwgetid']).split('ESSID:', 1)[1].strip()
 
     if runtime["is_first_run"] == 1:
-        print("*** WEDPI ***")
-        print(u"[INFO] We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
-        print(u"[INFO] Hostname={host}".format(host=runtime["host"]))
-        print(u"[INFO] Network={essid}".format(essid=ssid))
-        print(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
-        print("*************")
+        logging.debug("*** WEDPI ***")
+        logging.debug(u"[INFO] We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
+        logging.debug(u"[INFO] Hostname={host}".format(host=runtime["host"]))
+        logging.debug(u"[INFO] Network={essid}".format(essid=ssid))
+        logging.debug(u"[INFO] Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
+        logging.debug("*************")
 
         scrollphathd.clear()
         scrollphathd.show()
@@ -132,7 +140,7 @@ def mainloop():
             incoming_q.task_done()
             incoming_q.put(status)
 
-            print("[DEBUG] Pending tweet queue size = " + str(incoming_q.qsize()))
+            logging.debug("Pending tweet queue size = " + str(incoming_q.qsize()))
 
         except queue.Empty:
             time.sleep(1)
@@ -147,13 +155,13 @@ class MyStreamListener(tweepy.StreamListener):
             try:
                 status = unicodedata.normalize('NFKD', status).encode('ascii', 'ignore')
             except BaseException as e:
-                print(e)
+                logging.exception(e)
 
             # put tweet into the fifo queue
             incoming_q.put(status)
 
     def on_error(self, status_code):
-        print("[ERROR] {}".format(status_code))
+        logging.error("Error {}".format(status_code))
         if status_code == 420:
             return False
 
@@ -171,7 +179,7 @@ try:
     mainloop()
 
 except KeyboardInterrupt:
-    print("Exiting!")
+    logging.warn("Exiting!")
 
 finally:
     myStream.disconnect()
