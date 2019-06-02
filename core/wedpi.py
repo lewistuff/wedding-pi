@@ -85,12 +85,7 @@ def on_boot():
                                            .format(host=runtime["host"], ssid=ssid), font=FONT, brightness=DISPLAY_BRIGHTNESS)
         length -= scrollphathd.width
 
-        # Now for the scrolling loop...
-        while length > 0:
-            scrollphathd.scroll(1)  # Scroll the buffer one place to the left
-            scrollphathd.show()  # Show the result
-            length -= 1
-            time.sleep(BOOT_SCROLL_DELAY_IN_SECS)  # Delay for each scrolling step
+        scroll(length)
 
         runtime["is_first_run"] = 0
         time.sleep(5)
