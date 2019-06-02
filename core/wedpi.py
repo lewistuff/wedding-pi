@@ -46,8 +46,16 @@ FONT = font5x7
 # make FIFO queue
 incoming_q = queue.Queue()
 
+
+def prepare_msg(text):
+    return u'     {msg}     '.format(msg=text.upper())
+
+
 # init params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
+incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
+incoming_q.put("Saturday 8th June")
+incoming_q.put("Tweet us using #tuffwed")
 
 
 def on_boot():
@@ -86,6 +94,14 @@ def reset():
     scrollphathd.show()
 
 
+def scroll(length):
+    while length > 0:
+        scrollphathd.show()
+        scrollphathd.scroll(1)
+        length -= 1
+        time.sleep(TWEET_SCROLL_DELAY_IN_SECS)
+
+
 #
 # MAIN
 # define main loop to fetch formatted tweet from queue
@@ -108,11 +124,7 @@ def mainloop():
             status_length = scrollphathd.write_string(status, x=0, y=0, font=FONT, brightness=DISPLAY_BRIGHTNESS)
             time.sleep(0.25)
 
-            while status_length > 0:
-                scrollphathd.show()
-                scrollphathd.scroll(1)
-                status_length -= 1
-                time.sleep(TWEET_SCROLL_DELAY_IN_SECS)
+            scroll(status_length)
 
             reset()
             time.sleep(0.25)
@@ -162,6 +174,7 @@ except KeyboardInterrupt:
     print("Exiting!")
 
 finally:
+    myStream.disconnect()
     del myStream
     del incoming_q
     exit()
