@@ -42,6 +42,7 @@ if consumer_key == '' or consumer_secret == '' or access_token == '' or access_t
 #
 
 HASHTAG_TO_TRACK = str(os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed'))
+USER_TO_TRACK = str(os.getenv('WEDPI_USER_TO_TRACK', '1132584694711762944'))
 DISPLAY_BRIGHTNESS = float(os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2))
 BOOT_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06))
 TWEET_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02))
@@ -59,11 +60,14 @@ def prepare_msg(text):
         logging.exception("Failed to encode message")
 
 
+def init_queue():
+    incoming_q.put(prepare_msg(u"Welcome to Chemayne & Lewis's wedding"))
+    incoming_q.put(prepare_msg(u"Saturday 8th June 2019"))
+    incoming_q.put(prepare_msg(u"Tweet us using hashtag #tuffwed"))
+
+
 # initialise runtime params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
-incoming_q.put(prepare_msg(u"Welcome to Chemayne & Lewis's wedding"))
-incoming_q.put(prepare_msg(u"Saturday 8th June 2019"))
-incoming_q.put(prepare_msg(u"Tweet us using hashtag #tuffwed"))
 
 
 def on_boot():
@@ -116,6 +120,7 @@ def mainloop():
 
     # On start-up display the hostname
     on_boot()
+    init_queue()
     reset()
 
     while True:
@@ -147,6 +152,12 @@ def mainloop():
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         logging.debug(u'status={}'.format(status.text))
+
+        if status.text.startswith(':CLEAR'):
+            incoming_q.empty()
+            init_queue()
+            return
+
         if not status.text.startswith('RT'):
             msg = status.text.upper().replace(HASHTAG_TO_TRACK.upper(), '')
             status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
@@ -171,7 +182,7 @@ api = tweepy.API(auth)
 
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-myStream.filter(track=[HASHTAG_TO_TRACK], stall_warnings=True, async=True)
+myStream.filter(track=[HASHTAG_TO_TRACK], follow=[USER_TO_TRACK], stall_warnings=True, async=True)
 
 try:
     mainloop()
