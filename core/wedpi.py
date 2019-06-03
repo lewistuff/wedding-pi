@@ -146,7 +146,7 @@ def mainloop():
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
-        logging.debug("debug>" + status)
+        logging.debug(u'status={}'.format(status.text))
         if not status.text.startswith('RT'):
             msg = status.text.upper().replace(HASHTAG_TO_TRACK.upper(), '')
             status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
