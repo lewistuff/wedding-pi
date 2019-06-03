@@ -5,6 +5,9 @@ import time
 import unicodedata
 import os
 import logging
+logging.basicConfig(filename='/tmp/wedpi-app.log', level=logging.DEBUG,
+                    format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+
 
 try:
     import queue
@@ -42,9 +45,7 @@ HASHTAG_TO_TRACK = str(os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed'))
 DISPLAY_BRIGHTNESS = float(os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2))
 BOOT_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06))
 TWEET_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02))
-WEDPI_LOG_FILE = str(os.getenv('WEDPI_LOG_FILE', '/tmp/wedpi-app.log'))
 FONT = font5x7
-LOG_LEVEL = logging.DEBUG
 
 # make FIFO queue
 incoming_q = queue.Queue()
@@ -54,16 +55,15 @@ def prepare_msg(text):
     status = u'     {msg}     '.format(msg=text.upper())
     try:
         return unicodedata.normalize('NFKD', status).encode('ascii', 'ignore')
-    except BaseException as e:
-        logging.exception("Failed to encode message", e)
+    except BaseException:
+        logging.exception("Failed to encode message")
 
 
 # initialise runtime params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
-logging.basicConfig(filename=WEDPI_LOG_FILE, level=LOG_LEVEL)
-incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
-incoming_q.put(prepare_msg("Saturday 8th June 2019"))
-incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
+incoming_q.put(prepare_msg(u"Welcome to Chemayne & Lewis's wedding"))
+incoming_q.put(prepare_msg(u"Saturday 8th June 2019"))
+incoming_q.put(prepare_msg(u"Tweet us using hashtag #tuffwed"))
 
 
 def on_boot():
@@ -140,7 +140,7 @@ def mainloop():
         except queue.Empty:
             time.sleep(1)
 
-        except TypeError:
+        except Exception:
             logging.exception("Something went wrong in mainloop()")
 
 
@@ -179,7 +179,7 @@ try:
 except KeyboardInterrupt:
     logging.warn("Exiting!")
 
-except TypeError:
+except Exception:
     logging.exception("Something went wrong")
 
 finally:
