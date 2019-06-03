@@ -38,11 +38,11 @@ if consumer_key == '' or consumer_secret == '' or access_token == '' or access_t
 # PARAMS
 #
 
-HASHTAG_TO_TRACK = os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed')
-DISPLAY_BRIGHTNESS = os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2)
-BOOT_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06)
-TWEET_SCROLL_DELAY_IN_SECS = os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02)
-WEDPI_LOG_FILE = os.getenv('WEDPI_LOG_FILE', '/tmp/wedpi-app.log')
+HASHTAG_TO_TRACK = str(os.getenv('WEDPI_HASHTAG_TO_TRACK', '#tuffwed'))
+DISPLAY_BRIGHTNESS = float(os.getenv('WEDPI_DISPLAY_BRIGHTNESS', 0.2))
+BOOT_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0.06))
+TWEET_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02))
+WEDPI_LOG_FILE = str(os.getenv('WEDPI_LOG_FILE', '/tmp/wedpi-app.log'))
 FONT = font5x7
 LOG_LEVEL = logging.DEBUG
 
@@ -55,15 +55,15 @@ def prepare_msg(text):
     try:
         return unicodedata.normalize('NFKD', status).encode('ascii', 'ignore')
     except BaseException as e:
-        logging.exception(e)
+        logging.exception("Failed to encode message", e)
 
 
-# init params
+# initialise runtime params
 runtime = {"host": socket.gethostname().upper(), "is_first_run": 1}
 logging.basicConfig(filename=WEDPI_LOG_FILE, level=LOG_LEVEL)
-# incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
-# incoming_q.put(prepare_msg("Saturday 8th June 2019"))
-# incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
+incoming_q.put(prepare_msg("Welcome to Chemayne & Lewis's wedding"))
+incoming_q.put(prepare_msg("Saturday 8th June 2019"))
+incoming_q.put(prepare_msg("Tweet us using hashtag #tuffwed"))
 
 
 def on_boot():
@@ -135,14 +135,18 @@ def mainloop():
             incoming_q.task_done()
             incoming_q.put(status)
 
-            logging.debug("Pending tweet queue size = " + str(incoming_q.qsize()))
+            logging.debug(u'Pending tweet queue size = {}'.format(str(incoming_q.qsize())))
 
         except queue.Empty:
             time.sleep(1)
 
+        except TypeError:
+            logging.exception("Something went wrong in mainloop()")
+
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
+        logging.debug("debug>" + status)
         if not status.text.startswith('RT'):
             msg = status.text.upper().replace(HASHTAG_TO_TRACK.upper(), '')
             status = u'     >>>>>     @{name}: {text}     '.format(name=status.user.name.upper(), text=msg)
@@ -167,7 +171,6 @@ api = tweepy.API(auth)
 
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-
 myStream.filter(track=[HASHTAG_TO_TRACK], stall_warnings=True, async=True)
 
 try:
@@ -175,6 +178,9 @@ try:
 
 except KeyboardInterrupt:
     logging.warn("Exiting!")
+
+except TypeError:
+    logging.exception("Something went wrong")
 
 finally:
     myStream.disconnect()
