@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
+import logging
+import os
 import socket
 import time
 import unicodedata
-import os
-import logging
+
 logging.basicConfig(filename='/tmp/wedpi-app.log', level=logging.DEBUG,
                     format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%d-%b-%y %H:%M:%S')
-
 
 try:
     import queue
@@ -48,8 +48,28 @@ BOOT_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_BOOT_SCROLL_DELAY_IN_SECS', 0
 TWEET_SCROLL_DELAY_IN_SECS = float(os.getenv('WEDPI_TWEET_SCROLL_DELAY_IN_SECS', 0.02))
 FONT = font5x7
 
+
+class MutableQueue(queue.Queue):
+    """Extend the Queue to introduce a clear() method"""
+
+    def clear(self):
+        """
+        Clears all items from the queue.
+        """
+
+        with self.mutex:
+            unfinished = self.unfinished_tasks - len(self.queue)
+            if unfinished <= 0:
+                if unfinished < 0:
+                    raise ValueError('task_done() called too many times')
+                self.all_tasks_done.notify_all()
+            self.unfinished_tasks = unfinished
+            self.queue.clear()
+            self.not_full.notify_all()
+
+
 # make FIFO queue
-incoming_q = queue.Queue()
+incoming_q = MutableQueue()
 
 
 def prepare_msg(text):
@@ -78,17 +98,18 @@ def on_boot():
 
     if runtime["is_first_run"] == 1:
         logging.debug("*** WEDPI ***")
-        logging.debug(u"| We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
-        logging.debug(u"| Hostname={host}".format(host=runtime["host"]))
-        logging.debug(u"| Network={essid}".format(essid=ssid))
-        logging.debug(u"| Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
+        logging.debug(u"We're online at {dt}".format(dt=time.strftime("%Y-%m-%d %H:%M")))
+        logging.debug(u"Hostname={host}".format(host=runtime["host"]))
+        logging.debug(u"Network={essid}".format(essid=ssid))
+        logging.debug(u"Waiting for tweets with {hashtag}...".format(hashtag=HASHTAG_TO_TRACK.upper()))
         logging.debug("*************")
 
         scrollphathd.clear()
         scrollphathd.show()
 
         length = scrollphathd.write_string(u'  ::: HOST >>> {host} :::  WIFI >>> {ssid} :::    '
-                                           .format(host=runtime["host"], ssid=ssid), font=FONT, brightness=DISPLAY_BRIGHTNESS)
+                                           .format(host=runtime["host"], ssid=ssid), font=FONT,
+                                           brightness=DISPLAY_BRIGHTNESS)
         length -= scrollphathd.width
 
         scroll(length)
@@ -130,6 +151,11 @@ def mainloop():
         try:
             scrollphathd.clear()
             status = incoming_q.get(False)
+
+            # if we receive a :CLEAR command reinitialise the queue
+            if ':CLEAR' in status:
+                init_queue()
+
             scrollphathd.write_string(status, font=FONT, brightness=DISPLAY_BRIGHTNESS)
             status_length = scrollphathd.write_string(status, x=0, y=0, font=FONT, brightness=DISPLAY_BRIGHTNESS)
             time.sleep(0.25)
@@ -153,11 +179,7 @@ def mainloop():
 
 class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
-        logging.debug(u'status={}'.format(status.text))
-
-        if status.text.startswith(':CLEAR'):
-            init_queue()
-            return
+        logging.debug(u'status = {0}>{1}'.format(status.user.name, status.text))
 
         if not status.text.startswith('RT'):
             msg = status.text.upper().replace(HASHTAG_TO_TRACK.upper(), '')
