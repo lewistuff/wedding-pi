@@ -207,7 +207,7 @@ api = tweepy.API(auth)
 
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-myStream.filter(track=[HASHTAG_TO_TRACK], follow=[USER_TO_TRACK], stall_warnings=True, async=True)
+myStream.filter(track=[HASHTAG_TO_TRACK], follow=[USER_TO_TRACK], stall_warnings=True, is_async=True)
 
 try:
     mainloop()
