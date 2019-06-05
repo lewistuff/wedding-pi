@@ -82,7 +82,8 @@ def prepare_msg(text):
 
 def init_queue():
     global incoming_q
-    incoming_q = queue.Queue()
+    logging.debug("Reinitialising the queue...")
+    incoming_q.clear()
     incoming_q.put(prepare_msg(u"Welcome to Chemayne & Lewis's wedding"))
     incoming_q.put(prepare_msg(u"Saturday 8th June 2019"))
     incoming_q.put(prepare_msg(u"Tweet us using hashtag #tuffwed"))
