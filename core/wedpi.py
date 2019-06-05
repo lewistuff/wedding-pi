@@ -7,7 +7,7 @@ import time
 import unicodedata
 
 logging.basicConfig(filename='/tmp/wedpi-app.log', level=logging.DEBUG,
-                    format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+                    format='%(asctime)s [%(levelname)s] [%(threadName)s] %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 try:
     import queue
