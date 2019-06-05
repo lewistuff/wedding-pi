@@ -155,6 +155,7 @@ def mainloop():
             # if we receive a :CLEAR command reinitialise the queue
             if ':CLEAR' in status:
                 init_queue()
+                continue
 
             scrollphathd.write_string(status, font=FONT, brightness=DISPLAY_BRIGHTNESS)
             status_length = scrollphathd.write_string(status, x=0, y=0, font=FONT, brightness=DISPLAY_BRIGHTNESS)
